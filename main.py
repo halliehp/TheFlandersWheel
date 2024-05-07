@@ -4,19 +4,17 @@ import copy
 import heapq
 import time
 
-# first 10 numbers is the trench
-# last three numbers represent the recesses
-goal_state = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0]
+# the flander's wheel is isomorphic to the sliding 8 puzzle!
+# this array represents where the top of the wheel is the top right
+goal_state = [['R', 'S', 'F'], 
+              ['E', '-', 'L'], 
+              ['D', 'N', 'A']]
 
-# 0 represents an empty slot
-input_state = [0, 2, 3, 4, 5, 6, 7, 8, 9, 1, 0, 0, 0]
+starting_state = [['L', 'A', 'N'], 
+                  ['F', '-', 'N'], 
+                  ['S', 'R', 'E']]
 
-# at every index the possible moves are move left or move right
-# if there is an empty spot, besides index 3, 5, 7 where you can move
-# up into 10, 11, 12
-recess = {3: 10, 5: 11, 7: 12}
-
-class Trench:
+class Wheel:
     def __init__(self, state):
         self.state = state
         self.children = []
