@@ -32,6 +32,11 @@ def print_state(state):
         print(state[i])
     print()
 
+def print_wheel(state): # just to show how state is isomorphic
+    print('   / '+state[0][2]+' \   ')
+    print('  '+state[0][1]+'      '+state[0][1])
+    print(' /  \  /  \\')
+
 # returns array position of the blank circle in the wheel
 def find_blank(curr_state):
     for i in range(3):
@@ -109,6 +114,26 @@ def manhattan_distance(state):
                 distance_sum += dist
     return distance_sum
 
+def queuing(heuristic, states, children, depth, expanded):
+    for child in children: # for each child in children
+        if child.state not in expanded: # if it hasn't already been expanded
+            if heuristic == 3: # depending on which heuristic we use
+                gx = manhattan_distance(child.state) # calculate the g(x)
+                child.heuristic = gx # set it in the child
+            cost = depth + gx # calculate the cost, which is depth + g(x)
+            child.cost = cost # set the cost in the child
+            heapq.heappush(states, (cost, child)) # push that child onto the heap with the cost
+            # so that it will be ordered in the heap by cost and can be dequeued in order
+    return states # return the states
+
+def general_search(heuristic, starting_state, tree_id):
+    states = []
+    expanded = set() # using a set so nothing can be repeated
+    heapq.heapify(states)
+    tree = Tree()
+    tree_id += 1
+    return 
+
 test = Wheel([['-', 'L', 'N'], 
                         ['F', 'D', 'A'], 
                         ['S', 'R', 'E']])
@@ -118,5 +143,3 @@ te = expand_state(starting_state, tree, 0)
 for e in te:
     print_state(e[0])
 print(tree)
-
-print(manhattan_distance(starting_state.state))
