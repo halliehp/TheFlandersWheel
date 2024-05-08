@@ -14,10 +14,6 @@ goal_coords = {'R': (0, 0), 'S': (0, 1), 'F': (0, 2),
                'E': (1, 0), '-': (1, 1), 'L': (1, 2),
                'D': (2, 0), 'N': (2, 1), 'A': (2, 2)}
 
-starting_state = [['L', 'A', 'N'], 
-                  ['F', '-', 'D'], 
-                  ['S', 'R', 'E']]
-
 class Wheel:
     def __init__(self, state: list[list[int]]):
         self.state = state
@@ -27,9 +23,13 @@ class Wheel:
         self.cost = 0
         self.tree_id = 0
 
-def print_puzzle(puzzle):
+starting_state = Wheel([['L', 'A', 'N'], 
+                        ['F', '-', 'D'], 
+                        ['S', 'R', 'E']])
+
+def print_state(state):
     for i in range(3):
-        print(puzzle[i])
+        print(state[i])
     print()
 
 # returns array position of the blank circle in the wheel
@@ -42,7 +42,7 @@ def find_blank(curr_state):
 def up(state): # coordinates of blank circle
     row, col = find_blank(state)
     if (row-1) < 0:
-        return None # move not possible
+        return False # move not possible
     new_state = copy.deepcopy(state)
     above = state[row-1][col]
     new_state[row][col] = above
@@ -52,7 +52,7 @@ def up(state): # coordinates of blank circle
 def down(state):
     row, col = find_blank(state)
     if (row+1) < 0:
-        return None # move not possible
+        return # move not possible
     new_state = copy.deepcopy(state)
     down = state[row+1][col]
     new_state[row][col] = down
@@ -62,7 +62,7 @@ def down(state):
 def left(state):
     row, col = find_blank(state)
     if (col-1) < 0:
-        return None # move not possible
+        return # move not possible
     new_state = copy.deepcopy(state)
     left = state[row][col-1]
     new_state[row][col] = left
@@ -72,12 +72,40 @@ def left(state):
 def right(state):
     row, col = find_blank(state)
     if (col+1) < 0:
-        return None # move not possible
+        return # move not possible
     new_state = copy.deepcopy(state)
     right = state[row][col+1]
     new_state[row][col] = right
     new_state[row][col+1] = '-'
     return new_state
 
-print_puzzle(starting_state)
-print_puzzle(left(starting_state))
+def expand_state(wheel: Wheel, tree: Tree, curr_tree_id):
+    state = wheel.state # 
+    children = [] # we will append all the expanded nodes here
+    move_up = up(state)
+    if move_up:
+        temp = Wheel(copy.deepcopy(move_up))
+        curr_tree_id += 1
+        temp.tree_id = curr_tree_id
+        children.append((temp.state, curr_tree_id))
+    move_down = down(state)
+    if move_down:
+        temp = Wheel(copy.deepcopy(move_down))
+        curr_tree_id += 1
+        temp.tree_id = curr_tree_id
+        children.append((temp.state, curr_tree_id))
+    for c in children:
+        tree.create_node(c[0], c[1], parent=wheel.tree_id)
+    """
+    move_left = left(state)
+    children.append(move_left)
+    move_right = right(puzzle)
+    children.append(move_right)"""
+    return children
+
+tree = Tree()
+tree.create_node(starting_state.state, starting_state.tree_id)
+te = expand_state(starting_state, tree, 0)
+for e in te:
+    print_state(e[0])
+print(tree)
