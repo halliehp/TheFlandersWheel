@@ -51,7 +51,7 @@ def up(state): # coordinates of blank circle
 
 def down(state):
     row, col = find_blank(state)
-    if (row+1) < 0:
+    if (row+1) > 2:
         return # move not possible
     new_state = copy.deepcopy(state)
     down = state[row+1][col]
@@ -71,7 +71,7 @@ def left(state):
 
 def right(state):
     row, col = find_blank(state)
-    if (col+1) < 0:
+    if (col+1) > 2:
         return # move not possible
     new_state = copy.deepcopy(state)
     right = state[row][col+1]
@@ -82,30 +82,41 @@ def right(state):
 def expand_state(wheel: Wheel, tree: Tree, curr_tree_id):
     state = wheel.state # 
     children = [] # we will append all the expanded nodes here
-    move_up = up(state)
-    if move_up:
-        temp = Wheel(copy.deepcopy(move_up))
-        curr_tree_id += 1
-        temp.tree_id = curr_tree_id
-        children.append((temp.state, curr_tree_id))
-    move_down = down(state)
-    if move_down:
-        temp = Wheel(copy.deepcopy(move_down))
-        curr_tree_id += 1
-        temp.tree_id = curr_tree_id
-        children.append((temp.state, curr_tree_id))
+    moves = [] # make a list of all moves here
+    moves.append(up(state))
+    moves.append(down(state))
+    moves.append(left(state))
+    moves.append(right(state))
+    for move in moves: # for each move
+        if move:
+            temp = Wheel(copy.deepcopy(move))
+            curr_tree_id += 1
+            temp.tree_id = curr_tree_id
+            children.append((temp.state, curr_tree_id))
     for c in children:
         tree.create_node(c[0], c[1], parent=wheel.tree_id)
-    """
-    move_left = left(state)
-    children.append(move_left)
-    move_right = right(puzzle)
-    children.append(move_right)"""
     return children
 
+def manhattan_distance(state):
+    distance_sum = 0
+    for i in range(3):
+        for j in range(3):
+            goal = goal_state[i][j]
+            curr = state[i][j]
+            if curr != '-': # we don't want to include the blank's distance
+                dist = abs(i - goal_coords[curr][0]) + abs(j - goal_coords[curr][1])
+                print(goal, dist)
+                distance_sum += dist
+    return distance_sum
+
+test = Wheel([['-', 'L', 'N'], 
+                        ['F', 'D', 'A'], 
+                        ['S', 'R', 'E']])
 tree = Tree()
 tree.create_node(starting_state.state, starting_state.tree_id)
 te = expand_state(starting_state, tree, 0)
 for e in te:
     print_state(e[0])
 print(tree)
+
+print(manhattan_distance(starting_state.state))
