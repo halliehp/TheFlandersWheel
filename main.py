@@ -15,7 +15,7 @@ goal_coords = {'R': (0, 0), 'S': (0, 1), 'F': (0, 2),
                'D': (2, 0), 'N': (2, 1), 'A': (2, 2)}
 
 starting_state = [['L', 'A', 'N'], 
-                  ['F', '-', 'N'], 
+                  ['F', '-', 'D'], 
                   ['S', 'R', 'E']]
 
 class Wheel:
@@ -49,5 +49,35 @@ def up(state): # coordinates of blank circle
     new_state[row-1][col] = '-'
     return new_state
 
+def down(state):
+    row, col = find_blank(state)
+    if (row+1) < 0:
+        return None # move not possible
+    new_state = copy.deepcopy(state)
+    down = state[row+1][col]
+    new_state[row][col] = down
+    new_state[row+1][col] = '-'
+    return new_state
+
+def left(state):
+    row, col = find_blank(state)
+    if (col-1) < 0:
+        return None # move not possible
+    new_state = copy.deepcopy(state)
+    left = state[row][col-1]
+    new_state[row][col] = left
+    new_state[row][col-1] = '-'
+    return new_state
+
+def right(state):
+    row, col = find_blank(state)
+    if (col+1) < 0:
+        return None # move not possible
+    new_state = copy.deepcopy(state)
+    right = state[row][col+1]
+    new_state[row][col] = right
+    new_state[row][col+1] = '-'
+    return new_state
+
 print_puzzle(starting_state)
-print_puzzle(up(starting_state))
+print_puzzle(left(starting_state))
