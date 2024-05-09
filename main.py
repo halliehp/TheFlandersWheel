@@ -106,16 +106,25 @@ def expand_state(wheel: Wheel, tree: Tree, curr_tree_id):
     wheel.children = children
     return children, curr_tree_id # children = a list of wheel objects
 
-def manhattan_distance(state):
+def manhattan_distance(state): # heuristic = 3
     distance_sum = 0
     for i in range(3):
         for j in range(3):
-            goal = goal_state[i][j]
             curr = state[i][j]
             if curr != '-': # we don't want to include the blank's distance
                 dist = abs(i - goal_coords[curr][0]) + abs(j - goal_coords[curr][1])
                 distance_sum += dist
     return distance_sum
+
+def misplaced_tile(state):
+    count = 0
+    for i in range(3):
+        for j in range(3):
+            if state[i][j] != goal_state[i][j]:
+                count += 1
+    if count == 9:
+        count = 8
+    return count
 
 def queuing(heuristic, states, children, depth, expanded):
     for child in children: # for each child in children
@@ -123,6 +132,11 @@ def queuing(heuristic, states, children, depth, expanded):
             if heuristic == 3: # depending on which heuristic we use
                 gx = manhattan_distance(child.state) # calculate the g(x)
                 child.heuristic = gx # set it in the child
+            elif heuristic == 2:
+                gx = misplaced_tile(child.state)
+                child.heuristic = gx
+            elif heuristic == 1:
+                gx = 0
             cost = depth + gx # calculate the cost, which is depth + g(x)
             child.cost = cost # set the cost in the child
             heapq.heappush(states, (cost, child)) # push that child onto the heap with the cost
@@ -138,6 +152,8 @@ def general_search(heuristic, starting_state, tree_id):
 
     if heuristic == 3:
         starting_state.heuristic = manhattan_distance(starting_state.state)
+    elif heuristic == 2:
+        starting_state.heuristic = misplaced_tile(starting_state.state)
 
     starting_state.cost = starting_state.heuristic
     starting_state.tree_id = tree_id
@@ -171,9 +187,10 @@ def general_search(heuristic, starting_state, tree_id):
     if len(states) == 0:
         print('There is no solution to this problem!')
 
+# choosing heuristic 1 is uniform cost search, 2 is misplaced tile, 3 is manhattan distance
 print('Solving the Flanders Wheel puzzle!')
 start = time.time()
-tree = general_search(3, starting_state, 0)
+tree = general_search(1, starting_state, 0)
 end = time.time()
 elapsed = end - start
 print('Time elapsed:', round(elapsed, 1))
