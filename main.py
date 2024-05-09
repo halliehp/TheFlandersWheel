@@ -47,7 +47,7 @@ def find_blank(curr_state):
 def up(state): # coordinates of blank circle
     row, col = find_blank(state)
     if (row-1) < 0:
-        return False # move not possible
+        return # move not possible
     new_state = copy.deepcopy(state)
     above = state[row-1][col]
     new_state[row][col] = above
@@ -97,10 +97,10 @@ def expand_state(wheel: Wheel, tree: Tree, curr_tree_id):
             temp = Wheel(copy.deepcopy(move))
             curr_tree_id += 1
             temp.tree_id = curr_tree_id
-            children.append((temp.state, curr_tree_id))
+            children.append(temp)
     for c in children:
-        tree.create_node(c[0], c[1], parent=wheel.tree_id)
-    return children
+        tree.create_node(c.state, c.tree_id, parent=wheel.tree_id)
+    return children, curr_tree_id # children = a list of wheel objects
 
 def manhattan_distance(state):
     distance_sum = 0
@@ -132,14 +132,44 @@ def general_search(heuristic, starting_state, tree_id):
     heapq.heapify(states)
     tree = Tree()
     tree_id += 1
-    return 
+
+    if heuristic == 3:
+        starting_state.heuristic = manhattan_distance(starting_state.state)
+
+    starting_state.tree_id = tree_id
+    tree.create_node(starting_state.state, tree_id)
+    heapq.heappush(states, (starting_state.cost, starting_state))
+    q_size = 0
+    expanded_count = 0
+
+    while len(states) > 0:
+        q_size = max(len(states), q_size)
+        curr = heapq.heappop(states)
+        curr_state = copy.deepcopy(curr[1]) # bc the heap is tuples of (cost, wheel)
+
+        print('Best state to expand with g(x): ', curr.depth, ' and h(x): ', curr.heuristic)
+        print_state(curr_state.state)
+
+        if numpy.array_equal(curr_state.state, goal_state): # wheel has been solved!
+            print('Flanders Wheel has been solved!')
+            print('Number of nodes expanded: ', expanded_count)
+            print('Max queue size: ', q_size)
+            print('Depth of solution is: ', curr_state.depth)
+            return curr_state.state
+        else:
+            temp = curr_state.state
+            if temp not in expanded:
+                # do something IDK!!!!!!!!!!!!!!!
+                return
+
+
 
 test = Wheel([['-', 'L', 'N'], 
                         ['F', 'D', 'A'], 
                         ['S', 'R', 'E']])
 tree = Tree()
 tree.create_node(starting_state.state, starting_state.tree_id)
-te = expand_state(starting_state, tree, 0)
-for e in te:
-    print_state(e[0])
+te = expand_state(starting_state, tree, starting_state.tree_id)
+print(tree)
+expand_state(te[0][0], tree, te[1])
 print(tree)
