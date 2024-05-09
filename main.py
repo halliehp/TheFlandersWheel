@@ -22,6 +22,8 @@ class Wheel:
         self.heuristic = 0
         self.cost = 0
         self.tree_id = 0
+    def __lt__(self, other):
+        return self.cost < other.cost
 
 starting_state = Wheel([['L', 'A', 'N'], 
                         ['F', '-', 'D'], 
@@ -100,6 +102,8 @@ def expand_state(wheel: Wheel, tree: Tree, curr_tree_id):
             children.append(temp)
     for c in children:
         tree.create_node(c.state, c.tree_id, parent=wheel.tree_id)
+        c.depth = wheel.depth +1
+    wheel.children = children
     return children, curr_tree_id # children = a list of wheel objects
 
 def manhattan_distance(state):
@@ -110,13 +114,12 @@ def manhattan_distance(state):
             curr = state[i][j]
             if curr != '-': # we don't want to include the blank's distance
                 dist = abs(i - goal_coords[curr][0]) + abs(j - goal_coords[curr][1])
-                print(goal, dist)
                 distance_sum += dist
     return distance_sum
 
 def queuing(heuristic, states, children, depth, expanded):
     for child in children: # for each child in children
-        if child.state not in expanded: # if it hasn't already been expanded
+        if str(child.state) not in expanded: # if it hasn't already been expanded
             if heuristic == 3: # depending on which heuristic we use
                 gx = manhattan_distance(child.state) # calculate the g(x)
                 child.heuristic = gx # set it in the child
@@ -136,6 +139,7 @@ def general_search(heuristic, starting_state, tree_id):
     if heuristic == 3:
         starting_state.heuristic = manhattan_distance(starting_state.state)
 
+    starting_state.cost = starting_state.heuristic
     starting_state.tree_id = tree_id
     tree.create_node(starting_state.state, tree_id)
     heapq.heappush(states, (starting_state.cost, starting_state))
@@ -147,7 +151,7 @@ def general_search(heuristic, starting_state, tree_id):
         curr = heapq.heappop(states)
         curr_state = copy.deepcopy(curr[1]) # bc the heap is tuples of (cost, wheel)
 
-        print('Best state to expand with g(x): ', curr.depth, ' and h(x): ', curr.heuristic)
+        print('Best state to expand with g(x): ', curr_state.depth, ' and h(x): ', curr_state.heuristic)
         print_state(curr_state.state)
 
         if numpy.array_equal(curr_state.state, goal_state): # wheel has been solved!
@@ -157,19 +161,25 @@ def general_search(heuristic, starting_state, tree_id):
             print('Depth of solution is: ', curr_state.depth)
             return curr_state.state
         else:
-            temp = curr_state.state
-            if temp not in expanded:
-                # do something IDK!!!!!!!!!!!!!!!
-                return
+            if str(curr_state.state) not in expanded:
+                expanded.add(str(curr_state.state))
+                expand = expand_state(curr_state, tree, tree_id)
+                expanded_count += 1
+                states = queuing(heuristic, states, curr_state.children, curr_state.depth, expanded)
+                tree_id += expand[1]
+    
+    if len(states) == 0:
+        print('There is no solution to this problem!')
 
+    return tree
 
-
-test = Wheel([['-', 'L', 'N'], 
-                        ['F', 'D', 'A'], 
-                        ['S', 'R', 'E']])
-tree = Tree()
-tree.create_node(starting_state.state, starting_state.tree_id)
-te = expand_state(starting_state, tree, starting_state.tree_id)
-print(tree)
-expand_state(te[0][0], tree, te[1])
+test = Wheel([['S', 'F', 'L'], 
+              ['R', '-', 'E'], 
+              ['D', 'N', 'A']])
+print('Solving the Flanders Wheel puzzle!')
+start = time.time()
+tree = general_search(3, test, 0)
+end = time.time()
+elapsed = end - start
+print('Time elapsed:', round(elapsed, 1))
 print(tree)
