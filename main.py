@@ -6,13 +6,13 @@ import time
 
 # the flander's wheel is isomorphic to the sliding 8 puzzle!
 # this array represents where the top of the wheel is the top right
-goal_state = [['R', 'S', 'F'], 
-              ['E', '-', 'L'], 
-              ['D', 'N', 'A']]
+goal_state = [['A', 'L', 'F'], 
+              ['N', '-', 'S'], 
+              ['D', 'E', 'R']]
 
-goal_coords = {'R': (0, 0), 'S': (0, 1), 'F': (0, 2),
-               'E': (1, 0), '-': (1, 1), 'L': (1, 2),
-               'D': (2, 0), 'N': (2, 1), 'A': (2, 2)}
+goal_coords = {'A': (0, 0), 'L': (0, 1), 'F': (0, 2),
+               'N': (1, 0), '-': (1, 1), 'S': (1, 2),
+               'D': (2, 0), 'E': (2, 1), 'R': (2, 2)}
 
 class Wheel:
     def __init__(self, state: list[list[int]]):
@@ -171,15 +171,9 @@ def general_search(heuristic, starting_state, tree_id):
     if len(states) == 0:
         print('There is no solution to this problem!')
 
-    return tree
-
-test = Wheel([['S', 'F', 'L'], 
-              ['R', '-', 'E'], 
-              ['D', 'N', 'A']])
 print('Solving the Flanders Wheel puzzle!')
 start = time.time()
-tree = general_search(3, test, 0)
+tree = general_search(3, starting_state, 0)
 end = time.time()
 elapsed = end - start
 print('Time elapsed:', round(elapsed, 1))
-print(tree)
